@@ -21,8 +21,8 @@ jobs:
       - name: Test Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_IMAGE }}:test .
-          docker run -ti --rm -p 8000:8000 ${{ secrets.DOCKER_HUB_IMAGE }}:test python -m http. server 8000
-          curl localhost:8000
+          docker run --rm -p 8000:8000 -d ${{ secrets.DOCKER_HUB_IMAGE }}:test python -m http. server 8000
+          curl -I --fail localhost:8000
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
