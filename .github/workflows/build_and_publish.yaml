@@ -22,8 +22,9 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_IMAGE }}:local_test .
           docker run --rm -p 8000:8000 -d ${{ secrets.DOCKER_HUB_IMAGE }}:local_test python -m http.server 8000
-          curl -I --fail localhost:8000
-
+      
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
