@@ -55,6 +55,3 @@ jobs:
       - name: Docker push image to DockerHub
         run: |
           docker push ${{ secrets.DOCKER_HUB_IMAGE }}:latest
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
