@@ -17,12 +17,6 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Set short git commit SHA
-        id: vars
-        run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "::set-output name=short_sha::$calculatedSha"
-          
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -32,18 +26,18 @@ jobs:
       
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_IMAGE }}:${{ steps.vars.outputs.sha_short }} .
+          docker build -t ${{ secrets.DOCKER_HUB_IMAGE }}:${{ github.sha }} .
       
       - name: Run image tests
         run: |
-          docker run --rm -p 8000:8000 -d ${{ secrets.DOCKER_HUB_IMAGE }}:${{ steps.vars.outputs.sha_short }} python -m http.server 8000
+          docker run --rm -p 8000:8000 -d ${{ secrets.DOCKER_HUB_IMAGE }}:${{ github.sha }} python -m http.server 8000
           sleep 5
           curl -I --fail localhost:8000
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ secrets.DOCKER_HUB_IMAGE }}:${{ steps.vars.outputs.sha_short }}'
+          image-ref: '${{ secrets.DOCKER_HUB_IMAGE }}:${{ github.sha }}'
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
@@ -62,5 +56,5 @@ jobs:
       
       - name: Docker push image to DockerHub
         run: |
-          docker tag ${{ secrets.DOCKER_HUB_IMAGE }}:${{ steps.vars.outputs.sha_short }} ${{ secrets.DOCKER_HUB_IMAGE }}:latest
+          docker tag ${{ secrets.DOCKER_HUB_IMAGE }}:${{ github.sha }} ${{ secrets.DOCKER_HUB_IMAGE }}:latest
           docker push ${{ secrets.DOCKER_HUB_IMAGE }}:latest
