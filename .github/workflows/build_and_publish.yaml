@@ -14,7 +14,7 @@ jobs:
       id-token: write
       contents: write
       security-events: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
@@ -26,18 +26,18 @@ jobs:
       
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_IMAGE }}:latest .
+          docker build -t ${{ secrets.DOCKER_HUB_IMAGE }}:${{ steps.vars.outputs.sha_short }} .
       
       - name: Run image tests
         run: |
-          docker run --rm -p 8000:8000 -d ${{ secrets.DOCKER_HUB_IMAGE }}:latest python -m http.server 8000
+          docker run --rm -p 8000:8000 -d ${{ secrets.DOCKER_HUB_IMAGE }}:${{ steps.vars.outputs.sha_short }} python -m http.server 8000
           sleep 5
           curl -I --fail localhost:8000
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ secrets.DOCKER_HUB_IMAGE }}:latest'
+          image-ref: '${{ secrets.DOCKER_HUB_IMAGE }}:${{ steps.vars.outputs.sha_short }}'
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
@@ -56,4 +56,5 @@ jobs:
       
       - name: Docker push image to DockerHub
         run: |
+          docker tag ${{ secrets.DOCKER_HUB_IMAGE }}:${{ steps.vars.outputs.sha_short }} ${{ secrets.DOCKER_HUB_IMAGE }}:latest
           docker push ${{ secrets.DOCKER_HUB_IMAGE }}:latest
