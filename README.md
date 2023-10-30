@@ -5,5 +5,5 @@ The image is currently published [here](https://hub.docker.com/r/charmed/base-22
 You can use this image seamlesly as any other python Docker image by specifying it as a base with.
 
 ```
-FROM charmed/base-2204-python38:latest
+FROM michalhuckocanonical/base-2204-python38:latest
 ```
